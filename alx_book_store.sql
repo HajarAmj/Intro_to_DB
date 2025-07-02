@@ -1,61 +1,56 @@
--- Create and select the database
+-- Create the database
 CREATE DATABASE IF NOT EXISTS alx_book_store;
+
+-- Use the database
 USE alx_book_store;
 
--- Authors table
+-- Create Authors table
 CREATE TABLE Authors (
-  author_id INT AUTO_INCREMENT PRIMARY KEY,
-  author_name VARCHAR(215) NOT NULL
-) ENGINE=InnoDB;
+    author_id INT AUTO_INCREMENT PRIMARY KEY,
+    author_name VARCHAR(215) NOT NULL
+);
 
--- Books table
-CREATE TABLE Books (
-  book_id INT AUTO_INCREMENT PRIMARY KEY,
-  title VARCHAR(130) NOT NULL,
-  author_id INT NOT NULL,
-  price DECIMAL(10, 2) NOT NULL,  -- Changed to DECIMAL for precise monetary values
-  publication_date DATE,
-  CONSTRAINT fk_books_author
-    FOREIGN KEY (author_id)
-    REFERENCES Authors(author_id)
-    ON DELETE RESTRICT
-    ON UPDATE CASCADE
-) ENGINE=InnoDB;
-
--- Customers table (corrected to 'Customers' for case sensitivity)
+-- Create Customers table
 CREATE TABLE Customers (
-  customer_id INT AUTO_INCREMENT PRIMARY KEY,
-  customer_name VARCHAR(215) NOT NULL,
-  email VARCHAR(215) NOT NULL UNIQUE,
-  address TEXT
-) ENGINE=InnoDB;
+    customer_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_name VARCHAR(215) NOT NULL,
+    email VARCHAR(215) UNIQUE NOT NULL,
+    address TEXT
+);
 
--- Orders table with explicit FK to Customers
+-- Create Books table
+CREATE TABLE Books (
+    book_id INT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(130) NOT NULL,
+    author_id INT NOT NULL,
+    price DOUBLE NOT NULL CHECK (price >= 0),
+    publication_date DATE,
+    FOREIGN KEY (author_id) REFERENCES Authors(author_id) ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- Create Orders table
 CREATE TABLE Orders (
-  order_id INT AUTO_INCREMENT PRIMARY KEY,
-  customer_id INT NOT NULL,
-  order_date DATE NOT NULL,
-  CONSTRAINT fk_orders_customer
-    FOREIGN KEY (customer_id)
-    REFERENCES Customers(customer_id)  -- Matches exact case 'Customers'
-    ON DELETE RESTRICT
-    ON UPDATE CASCADE
-) ENGINE=InnoDB;
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    order_date DATE NOT NULL,
+    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id) ON DELETE RESTRICT ON UPDATE CASCADE
+);
 
--- Order details table
+-- Create Order_Details table
 CREATE TABLE Order_Details (
-  order_detail_id INT AUTO_INCREMENT PRIMARY KEY,
-  order_id INT NOT NULL,
-  book_id INT NOT NULL,
-  quantity INT NOT NULL,  -- Changed to INT (quantities are whole numbers)
-  CONSTRAINT fk_od_order
-    FOREIGN KEY (order_id)
-    REFERENCES Orders(order_id)
-    ON DELETE CASCADE
-    ON UPDATE CASCADE,
-  CONSTRAINT fk_od_book
-    FOREIGN KEY (book_id)
-    REFERENCES Books(book_id)
-    ON DELETE RESTRICT
-    ON UPDATE CASCADE
-) ENGINE=InnoDB;
+    order_detail_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id INT NOT NULL,
+    book_id INT NOT NULL,
+    quantity DOUBLE NOT NULL CHECK (quantity > 0),
+    FOREIGN KEY (order_id) REFERENCES Orders(order_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (book_id) REFERENCES Books(book_id) ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- Add indexes for better performance
+CREATE INDEX idx_books_author_id ON Books(author_id);
+CREATE INDEX idx_books_title ON Books(title);
+CREATE INDEX idx_orders_customer_id ON Orders(customer_id);
+CREATE INDEX idx_orders_order_date ON Orders(order_date);
+CREATE INDEX idx_order_details_order_id ON Order_Details(order_id);
+CREATE INDEX idx_order_details_book_id ON Order_Details(book_id);
+CREATE INDEX idx_customers_email ON Customers(email);
