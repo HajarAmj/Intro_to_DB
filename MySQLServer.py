@@ -5,7 +5,6 @@ Creates the alx_book_store database if it doesn't exist
 """
 
 import mysql.connector
-from mysql.connector import Error
 
 def create_database():
     """
@@ -34,7 +33,7 @@ def create_database():
             
             print("Database 'alx_book_store' created successfully!")
             
-    except Error as e:
+    except mysql.connector.Error as e:
         print(f"Error: Failed to connect to MySQL server or create database - {e}")
         
     finally:
